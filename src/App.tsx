@@ -1,7 +1,10 @@
+import Layout from "./components/Layout"
 
 function App() {
   return (
-    <h1>Shpping Cart</h1>
+    <>
+      <Layout />
+    </>
   )
 }
 
