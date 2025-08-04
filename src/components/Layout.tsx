@@ -60,7 +60,7 @@ const Layout = () => {
         </div>
       </nav>
 
-      <div className="container mx-auto p-4 h-[calc(100vh-60px)] overflow-auto">
+      <div className="p-4 pr-0 h-[calc(100vh-60px)] overflow-auto">
         <Outlet />
       </div>
     </>
