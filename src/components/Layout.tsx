@@ -39,8 +39,7 @@ const Layout = () => {
               ☰
             </button>
 
-            {isMenuOpen && (
-              <div className="absolute right-0 top-8 w-36 bg-gray-900 text-white p-4 rounded-lg shadow-lg border border-gray-700 z-10">
+              <div className={`transition-all overflow-hidden duration-200 absolute right-0 top-8 w-36 bg-gray-900 text-white rounded-lg shadow-lg z-10 ${isMenuOpen ? 'max-h-[90px] p-4' : 'max-h-0 p-0 border-0'}`}>
                 <Link
                   to="/"
                   className="block mb-2 hover:text-gray-400 transition duration-200"
@@ -56,7 +55,7 @@ const Layout = () => {
                   Shop
                 </Link>
               </div>
-            )}
+            
           </div>
         </div>
       </nav>
