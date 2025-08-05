@@ -5,11 +5,17 @@ interface product {
   image: string;
   title: string;
 }
+interface CartItem {
+  id: number;
+  quantity: number;
+}
 
 const Shop = () => {
   const [products, setProducts] = useState<product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [quantities, setQuantities] = useState<{ [productId: number]: number }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,6 +35,23 @@ const Shop = () => {
 
     fetchData();
   }, []);
+
+  const handleAddToCart = (product: CartItem) => {
+    const existingItem = cart.find((item) => item.id === product.id);
+
+    if (existingItem) {
+      const updatedCart = cart.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + product.quantity }
+          : item
+      );
+      setCart(updatedCart);
+    } else {
+      setCart([...cart, product]);
+    }
+  };
+
+  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   if (isLoading) {
     return (
@@ -52,8 +75,10 @@ const Shop = () => {
 
       {/* Cart Info Section (Static) */}
       <div className="flex items-center justify-between bg-gray-100 p-4 rounded-md shadow-sm mb-6">
-        <span className="text-lg font-medium">Items in Cart: 0</span>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        <span className="text-lg font-medium">
+          Items in Cart: {totalQuantity}
+        </span>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition cursor-pointer">
           Checkout
         </button>
       </div>
@@ -64,33 +89,84 @@ const Shop = () => {
         {products.map((product) => (
           <div
             key={product.id}
-            className="w-72 sm:w-full sm:max-w-[550px] border rounded-lg p-4 shadow-sm flex flex-col items-center justify-between bg-white hover:shadow-md hover:border-blue-500 transition duration-200"
+            className="w-72 sm:w-full sm:max-w-[400px] border rounded-lg p-4 shadow-sm flex flex-col items-center justify-between bg-white hover:shadow-md hover:border-blue-500 transition duration-200"
           >
-            <div>
-              <img
-                src={product.image}
-                alt={product.title}
-                className="w-24 h-32 object-contain mb-4"
-              />
-            </div>
+            <img
+              src={product.image}
+              alt={product.title}
+              className="w-24 h-32 object-contain mb-4"
+            />
+
             <div className="flex flex-col items-center">
               <h2 className="text-center font-semibold text-sm mb-2">
                 {product.title}
               </h2>
 
               <div className="flex items-center gap-2 mb-4">
-                <button className="px-2.5 py-1 bg-gray-300 rounded">-</button>
+                <button
+                  className="px-2.5 py-1 bg-gray-300 rounded cursor-pointer"
+                  onClick={() => {
+                    setQuantities((prev) => {
+                      const current = prev[product.id] || 1;
+                      return {
+                        ...prev,
+                        [product.id]: Math.max(1, current - 1),
+                      };
+                    });
+                  }}
+                >
+                  -
+                </button>
                 <input
                   type="number"
                   className="w-12 text-center border rounded appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  defaultValue={1}
                   min={1}
+                  value={quantities[product.id] || 1} // fallback to 1 if undefined
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val)) {
+                      setQuantities((prev) => ({
+                        ...prev,
+                        [product.id]: val,
+                      }));
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!val || val < 1) {
+                      setQuantities((prev) => ({
+                        ...prev,
+                        [product.id]: 1,
+                      }));
+                    }
+                  }}
                 />
 
-                <button className="px-2.5 py-1 bg-gray-300 rounded">+</button>
+                <button
+                  className="px-2.5 py-1 bg-gray-300 rounded cursor-pointer"
+                  onClick={() => {
+                    setQuantities((prev) => {
+                      const current = prev[product.id] || 1;
+                      return {
+                        ...prev,
+                        [product.id]: current + 1,
+                      };
+                    });
+                  }}
+                >
+                  +
+                </button>
               </div>
 
-              <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm">
+              <button
+                onClick={() =>
+                  handleAddToCart({
+                    id: product.id,
+                    quantity: quantities[product.id] || 1,
+                  })
+                }
+                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm cursor-pointer"
+              >
                 Add to Cart
               </button>
             </div>
