@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface product {
   id: number;
@@ -51,7 +51,11 @@ const Shop = () => {
     }
   };
 
-  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  const totalQuantity = useMemo(() => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cart]);
+
 
   if (isLoading) {
     return (
